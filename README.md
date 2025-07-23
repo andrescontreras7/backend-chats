@@ -2,7 +2,7 @@
 
 Sistema de microservicios para gestión de canchas deportivas desarrollado con FastAPI, MySQL y Docker.
 
-## 🏗️ Arquitectura del Sistema
+##  Arquitectura del Sistema
 
 El proyecto está compuesto por tres microservicios principales:
 
@@ -11,13 +11,13 @@ El proyecto está compuesto por tres microservicios principales:
 - **Canchas Service** (Puerto 8002): Gestión de canchas y reservas
 - **API Gateway** (Puerto 3001): Nginx como proxy reverso
 
-## 📋 Prerrequisitos
+## Prerrequisitos
 
 - [Docker](https://www.docker.com/get-started) 
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - Git
 
-## 🚀 Instalación y Configuración
+## Instalacion y Configuración
 
 ### 1. Clonar el repositorio
 
@@ -46,7 +46,7 @@ Una vez que los contenedores estén ejecutándose, puedes verificar el estado:
 docker-compose ps
 ```
 
-## 🌐 Acceso a los Servicios
+## Acceso a los Servicios
 
 ### APIs
 - **API Gateway**: http://localhost:3001
@@ -123,7 +123,7 @@ docker-compose down -v
 docker-compose down -v --rmi all
 ```
 
-## 🗃️ Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 backend-canchas/
@@ -155,7 +155,7 @@ Las variables de entorno principales se configuran en los archivos docker-compos
 - `ACCESS_TOKEN_EXPIRE_MINUTES`: Tiempo de expiración de tokens
 - `RABBITMQ_URL`: URL de conexión a RabbitMQ
 
-## 🏃‍♂️ Desarrollo
+## Desarrollo
 
 ### Modo desarrollo
 Para desarrollo con hot-reload, los contenedores están configurados con volúmenes que mapean el código fuente:
@@ -175,7 +175,7 @@ docker-compose exec auth-service pip install nueva-libreria
 docker-compose exec auth-service pip freeze > requirements.txt
 ```
 
-## 🚨 Solución de Problemas
+##  Solución de Problemas
 
 ### Los contenedores no se levantan
 1. Verificar que Docker esté ejecutándose
@@ -195,7 +195,7 @@ netstat -ano | findstr :8000
 # Cambiar el puerto en docker-compose.yml si es necesario
 ```
 
-## 📚 API Endpoints Principales
+## API Endpoints Principales
 
 ### Auth Service
 - `POST /register` - Registrar usuario
@@ -213,22 +213,7 @@ netstat -ano | findstr :8000
 - `POST /roles/` - Crear rol (admin)
 - `GET /permissions/` - Listar permisos
 
-## 🤝 Contribuir
 
-1. Fork el proyecto
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
 
-## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## 👥 Autores
-
-- Tu Nombre - Desarrollador Principal
-
-## 📞 Contacto
-
-Para preguntas o soporte, por favor abre un issue en GitHub.
+- Tu Andres cavadia - Desarrollador Principal
