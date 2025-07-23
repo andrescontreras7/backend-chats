@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  canchas-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: canchas-service
+    restart: always
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@canchas_mysql:3306/canchas_service
+      - SECRET_KEY=tu_clave_super_segura
+      - ALGORITHM=HS256
+      - AUTH_SERVICE_URL=http://auth-service:8000
+    depends_on:
+      canchas_mysql:
+        condition: service_healthy
+    networks:
+      - backend-canchas_default
+
+  canchas_mysql:
+    image: mysql:8.0
+    container_name: canchas-mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: canchas_service
+    ports:
+      - "3309:3306"
+    volumes:
+      - canchas_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - backend-canchas_default
+
+volumes:
+  canchas_mysql_data:
+
+networks:
+  backend-canchas_default:
+    external: true

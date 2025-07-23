@@ -1,0 +1,181 @@
+version: "3.9"
+
+services:
+  # API Gateway (Nginx como proxy)
+  api-gateway:
+    image: nginx:alpine
+    container_name: api-gateway
+    ports:
+      - "3001:80"  # Un solo puerto para el frontend
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth-service
+      - roles-service
+      - canchas-service
+    restart: unless-stopped
+
+  # Servicio de Autenticación
+  auth-service:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@auth-mysql-db:3306/auth
+      - SECRET_KEY=tu_clave_super_segura
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq-server:5672/
+    depends_on:
+      auth_mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./auth_service/app:/app
+    working_dir: /app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Servicio de Roles  
+  roles-service:
+    build:
+      context: ./roles_service
+      dockerfile: Dockerfile
+    container_name: roles-service
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@roles-mysql-db:3306/roles_service
+      - SECRET_KEY=tu_clave_super_segura
+      - ALGORITHM=HS256
+      - AUTH_SERVICE_URL=http://auth-service:8000
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq-server:5672/
+    depends_on:
+      roles_mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./roles_service/app:/app
+    working_dir: /app
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+
+  # Servicio de Canchas  
+  canchas-service:
+    build:
+      context: ./canchas_service
+      dockerfile: Dockerfile
+    container_name: canchas-service
+    restart: always
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@canchas-mysql-db:3306/canchas
+      - SECRET_KEY=tu_clave_super_segura
+      - ALGORITHM=HS256
+      - AUTH_SERVICE_URL=http://auth-service:8000
+    depends_on:
+      canchas_mysql:
+        condition: service_healthy
+    volumes:
+      - ./canchas_service/app:/app
+    working_dir: /app
+    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+
+  # Base de datos MySQL para Auth
+  auth_mysql:
+    image: mysql:8.0
+    container_name: auth-mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: auth
+    ports:
+      - "3306:3306"
+    volumes:
+      - auth_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Base de datos MySQL para Roles
+  roles_mysql:
+    image: mysql:8.0
+    container_name: roles-mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: roles_service
+    ports:
+      - "3308:3306"
+    volumes:
+      - roles_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Base de datos MySQL para Canchas
+  canchas_mysql:
+    image: mysql:8.0
+    container_name: canchas-mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: canchas
+    ports:
+      - "3309:3306"
+    volumes:
+      - canchas_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq-server
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./auth_service/rabbitmq_enabled_plugins:/etc/rabbitmq/enabled_plugins
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  # phpMyAdmin para gestión de base de datos de roles
+  phpmyadmin-roles:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-roles
+    restart: always
+    environment:
+      PMA_HOST: roles_mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpass
+    ports:
+      - "8080:80"
+    depends_on:
+      roles_mysql:
+        condition: service_healthy
+
+volumes:
+  auth_mysql_data:
+  roles_mysql_data:
+  canchas_mysql_data:
+  rabbitmq_data:

@@ -1,0 +1,9 @@
+fastapi==0.104.1
+uvicorn==0.30.0
+sqlmodel==0.0.18
+pymysql==1.1.0
+cryptography==41.0.7
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.6
+pydantic==2.4.2
+httpx==0.25.2

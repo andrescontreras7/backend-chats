@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlmodel
+pydantic[email]
+python-dotenv
+aio-pika
+pymysql
+cryptography
+passlib[bcrypt]
+python-jose[cryptography]
+httpx

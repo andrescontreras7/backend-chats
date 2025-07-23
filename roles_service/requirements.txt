@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlmodel
+pydantic
+python-dotenv
+pymysql
+cryptography
+aio-pika
+python-jose[cryptography]
+httpx
